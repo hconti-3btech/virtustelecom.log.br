@@ -1,0 +1,274 @@
+@extends('adminlte::page')
+
+@section('title', 'Relatorio de Produção')
+
+@section('plugins.Chart', true)
+
+@section('plugins.Datatables', true)
+
+@section('content_header')
+    <h1 id="h01" class="m-0 text-dark">Relatorio de Serviços Geral</h1>
+@stop
+
+@section('content')
+
+    @if(session('msg'))
+        <div class="alert alert-{{session('type')}}">
+            <p>{{session('msg')}}</p>
+        </div>
+    @endif
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <form method="POS">
+                        <div class="row">    
+                            <div class="col-12 col-lg-12 mt-2"> 
+                                <form method="GET" accept="{{route('reportProducao')}}">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="far fa-user"></i></span>
+                                                    </div>
+                                                    <select class="custom-select rounded-0" id="tecnico" name="tecnico">
+                                                            <option value=''>Todos</option>
+                                                        @foreach ($tecnicos as $tecnico)
+                                                            <option value='{{$tecnico['id']}}' {{ old('tecnico') == $tecnico['id'] ? 'selected' : ''}}>{{$tecnico['name']}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>  
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                    </div>
+                                                    <input type="date" class="form-control" id="dateIni" name="data_ini" value="{{$dataIni}}">
+                                                </div>  
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                    </div>
+                                                    <input type="date" class="form-control" id="dateFim" data-inputmask-alias="datetime" data-inputmask-inputformat="mm/dd/yyyy" data-mask="" inputmode="numeric" name="data_fim">
+                                                </div>  
+                                            </div>
+                                        </div>
+                                        <div class="col-2">
+                                            <button type="submit" class="btn  btn-primary" onclick="return confirmar()">Filtro <i class="fas fa-solid fa-filter"></i></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>        
+                    </form>    
+                </div>    
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-lg-12">
+            <!-- DONUT CHART -->
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">O.S por Status:</h3>
+
+                    <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="ordensByStatus" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->        
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-12">
+            <!-- PIE CHART -->
+            <div class="card card-success">
+                <div class="card-header">
+                    <h3 class="card-title">Tecnicos:</h3>
+
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            <div class="card-body">
+                <table id="ordensByTec" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th id='col1'>Técnico</th>
+                            @php
+                                $i = 0;
+                            @endphp
+
+                            @foreach ($tblTecnicos as $tblTecnicosKey => $tblTecnicosValue)
+                                @php
+                                    //para executar apenas 1x
+                                    if ($i < 1){
+                                        foreach ($tblTecnicosValue as $tblTecnicosValueKey => $tblTecnicosValueValue) {
+
+                                            $tblTecnicosValueKeyExplode = explode(' ',$tblTecnicosValueKey);
+
+                                                for ($i=0; $i < count($tblTecnicosValueKeyExplode); $i++) { 
+
+                                                    if (strlen($tblTecnicosValueKeyExplode[$i]) > 3 ){
+                                                        $tblTecnicosValueKeyExplode[$i] = substr("$tblTecnicosValueKeyExplode[$i]", 0, 3).'. ';
+                                                    }else {
+                                                        $tblTecnicosValueKeyExplode[$i] = $tblTecnicosValueKeyExplode[$i].' ';
+                                                    }
+                                                    
+                                                }
+
+                                                $tblTecnicosValueKeyImplode = implode($tblTecnicosValueKeyExplode);
+
+                                            echo "<th> $tblTecnicosValueKeyImplode </th>";
+                                        } 
+                                    }
+                                    $i++;
+                                    
+                                @endphp
+
+                            @endforeach
+                            <th>Visualizar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            
+                        @foreach ($tblTecnicos as $tblTecnicosKey => $tblTecnicosValue)
+                            <tr>
+                                <td>{{$tblTecnicosKey}}</td>
+
+                                @foreach ( $tblTecnicosValue as $tblTecnicosValueValue)
+                                    <td>{{$tblTecnicosValueValue}}</td>                                    
+                                @endforeach
+                            
+                                @php
+                                    echo "<td><a href='".route('viewExecOrdem',['dt_ini' => $dt_ini, 'dt_fim' => $dt_fim, 'tec' => $tblTecnicosValue['id_tec']])."' class='btn btn-primary btn-sm' onclick='return confirmar()'>Visualizar</a></td>";        
+                                @endphp
+                            
+                            </tr>
+                        @endforeach
+
+                    </tbody>   
+                </table>
+            </div>
+            <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->
+        
+    </div>
+
+@stop
+
+@section('js')
+
+    {{-- Confirma envio de Formularo --}}
+
+    <script>
+        function confirmar(){
+        // só permitirá o envio se o usuário responder OK
+        var resposta = window.confirm("Deseja mesmo" + 
+                        " enviar o formulário?");
+        if(resposta)
+            return true;
+        else
+            return false; 
+        }
+    </script>
+
+    {{-- Datatable --}}
+    <script>
+        $(document).ready(function() {
+            $('#ordensByTec').DataTable( {
+                "language":{
+                    "url":"https://cdn.datatables.net/plug-ins/1.12.1/i18n/pt-BR.json"
+                },
+                "responsive": true,
+                "lengthChange": false,
+                "autoWidth": true,
+                "paging": true,
+                "info": true,
+                "searching": true,
+                "dom": 'Bfrtip',
+                "pageLength": 50,
+                "buttons": ["copy", "csv", "excel", "pdf"],
+                "columnDefs": [
+                    {
+                        targets: 1,
+                        visible: false,
+                        searchable: true
+                    }
+                ] ,
+                "order": [[2, "desc"]],
+            } );
+        } );
+    </script>
+    
+    {{-- Chats --}}
+    <script>
+
+        $(window).on("load", function(){
+            
+            function ordensByStatus (legenda,valores){  //-------------
+                //- DONUT CHART -
+                //-------------
+                // Get context with jQuery - using jQuery's .get() method.
+                var donutChartCanvas = $('#ordensByStatus').get(0).getContext('2d')
+                
+                var donutData        = {
+                labels : legenda,
+                datasets: valores
+                
+                }
+                //datasets
+                var donutOptions     = {
+                maintainAspectRatio : false,
+                responsive : true,
+                title: {
+                        display: true,
+                        text: 'Valores do periodo {{$dataIni}} até {{$dataFim}}',
+                        fullSize : true,
+                    }
+                }
+                //Create pie or douhnut chart
+                // You can switch between pie and douhnut using the method below.
+                new Chart(donutChartCanvas, {
+                type: 'doughnut',
+                data: donutData,
+                options: donutOptions
+                })
+            }
+            
+            ordensByStatus (<?=$ordensByStatusLegenda?>,<?=$ordensByStatusValores?>);
+
+        })
+        
+    </script>
+
+@endsection

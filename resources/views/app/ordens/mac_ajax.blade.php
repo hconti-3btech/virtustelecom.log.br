@@ -1,0 +1,1 @@
+<option value='{{$itenContainer[0]->mac}}'>{{$itenContainer[0]->mac}}</option> 
