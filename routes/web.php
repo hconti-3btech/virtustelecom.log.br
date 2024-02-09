@@ -108,6 +108,7 @@ Route::prefix('/app')->group(function(){
     Route::get('/reportFinanceiro', [App\Http\Controllers\app\ReportFinanceiroController::class, 'reportFinanceiro'])->name('reportFinanceiro');
     Route::get('/reportProducao/{dt_ini?}/{dt_fim?}/{tec?}', [App\Http\Controllers\app\ReportProducaoController::class, 'reportProducao'])->name('reportProducao');
     Route::get('/reportComissao', [App\Http\Controllers\app\ReportComissaoController::class, 'reportComissao'])->name('reportComissao');
+    Route::get('/reportUltimaPosicao', [App\Http\Controllers\app\ReportUltimaPosicaoController::class, 'reportUltimaPosicao'])->name('reportUltimaPosicao'); 
 
     ################## Valor Servico
     Route::get('/viewValorServico', [App\Http\Controllers\app\ValoreServicoController::class, 'viewValorServico'])->name('viewValorServico');
