@@ -475,6 +475,12 @@ return [
                     'route'   => 'reportComissao',
                     'icon'  => 'nav-icon fas fa-solid fa-umbrella-beach',
                     'can'         => 'ativo',
+                ],
+                [
+                    'text'  => 'Ultima Posiçao',
+                    'route'   => 'reportUltimaPosicao',
+                    'icon'  => 'nav-icon fas fa-solid fa-map-pin',
+                    'can'         => 'ativo',
                 ]
             ],
         ],
